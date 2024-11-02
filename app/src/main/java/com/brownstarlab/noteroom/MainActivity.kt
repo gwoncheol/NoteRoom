@@ -1,16 +1,16 @@
 package com.brownstarlab.noteroom
 
-import PdfScreen
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.brownstarlab.noteroom.ui.theme.NoteroomTheme
+import com.brownstarlab.noteroom.ui.theme.NoteRoomTheme
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 
 class MainActivity : ComponentActivity() {
@@ -18,10 +18,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         PDFBoxResourceLoader.init(applicationContext)
-
+        enableEdgeToEdge()
         // Intent로 전달받은 PDF Uri를 저장할 변수
         var pdfUri: Uri? = null
-
         // Intent 처리
         when (intent?.action) {
             Intent.ACTION_SEND -> {
@@ -29,6 +28,7 @@ class MainActivity : ComponentActivity() {
                     pdfUri = intent.getParcelableExtra(Intent.EXTRA_STREAM)
                 }
             }
+
             Intent.ACTION_VIEW -> {
                 // VIEW 인텐트로 전달된 PDF URI 처리
                 pdfUri = intent.data
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            NoteroomTheme {
+            NoteRoomTheme {
                 AppNavigation(
                     startDestination = if (pdfUri == null) Screens.Home.route else Screens.Pdf.route,
                     pdfUri = pdfUri
