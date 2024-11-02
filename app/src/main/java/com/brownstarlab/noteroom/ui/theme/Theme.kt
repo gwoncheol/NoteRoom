@@ -40,7 +40,7 @@ private val lightScheme = lightColorScheme(
     scrim = scrimLight,
     inverseSurface = inverseSurfaceLight,
     inverseOnSurface = inverseOnSurfaceLight,
-    inversePrimary = inversePrimaryLight,
+    inversePrimary = inversePrimaryLight
 )
 private val darkScheme = darkColorScheme(
     primary = primaryDark,
@@ -209,7 +209,7 @@ val unspecified_scheme = ColorFamily(
 fun NoteRoomTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
