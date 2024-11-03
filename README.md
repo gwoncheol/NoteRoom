@@ -26,23 +26,6 @@ PDF에 메모와 필기 공간을 확장하는 도구
 
 ---
 
-## 📂 설치 및 실행 방법
-
-1. 레포지토리 클론
-   ```bash
-   git clone https://github.com/gwoncheol/NoteRoom.git && cd NoteRoom
-   ```
-2. 의존성 설치
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. 프로그램 실행
-   ```bash
-   python main.py
-   ```
-
----
-
 ## 🖼️ 사용 예시
 
 1. PDF 파일을 불러옵니다.
