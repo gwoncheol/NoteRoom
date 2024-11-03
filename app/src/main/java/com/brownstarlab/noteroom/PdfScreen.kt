@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -51,6 +52,10 @@ private fun isNumber(text: String): Boolean {
 
 @Composable
 fun PdfScreen(pdfUri: Uri?) {
+    val defaultFileNameWithExtension = if (pdfUri?.lastPathSegment == null) "알 수 없는 파일" else pdfUri
+        .lastPathSegment + ".pdf"
+    val defaultFileName = pdfUri?.lastPathSegment ?: "알 수 없는 파일"
+    var fileName by remember { mutableStateOf(defaultFileName) }
     var topText by remember { mutableStateOf("") }
     var bottomText by remember { mutableStateOf("") }
     var leftText by remember { mutableStateOf("") }
@@ -83,18 +88,37 @@ fun PdfScreen(pdfUri: Uri?) {
                     .padding(20.dp, 20.dp, 20.dp, 0.dp)
                     .align(Alignment.BottomCenter)
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "NoteRoom",
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                    )
+//                    Image(
+//                        imageVector = ImageVector.vectorResource(id = R.drawable.noteroom_icon),
+//                        contentDescription = "NoteRoom",
+//                        modifier = Modifier.size(40.dp)
+//                    )
+                }
                 Text(
-                    text = "NoteRoom",
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                val fileName = if (pdfUri?.lastPathSegment == null) "알 수 없는 파일" else pdfUri
-                    .lastPathSegment + ".pdf"
-                Text(
-                    text = "파일: $fileName",
+                    text = "파일: $defaultFileNameWithExtension",
                     modifier = Modifier.padding(bottom = 16.dp)
+                )
+                OutlinedTextField(
+                    value = fileName,
+                    onValueChange = { fileName = it },
+                    label = { Text("파일 이름") },
+                    suffix = { Text("pdf") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
                 )
                 OutlinedTextField(
                     value = topText,
@@ -142,6 +166,19 @@ fun PdfScreen(pdfUri: Uri?) {
                         singleLine = true
                     )
                 }
+                val execute = {
+                    addMarginsToPdf(
+                        context = context,
+                        exportFileName = fileName,
+                        inputUri = pdfUri,
+                        topMargin = topText.toFloatOrNull() ?: 0f,
+                        bottomMargin = bottomText.toFloatOrNull() ?: 0f,
+                        leftMargin = leftText.toFloatOrNull() ?: 0f,
+                        rightMargin = rightText.toFloatOrNull() ?: 0f
+                    )
+                }
+                val isExecutable =
+                    !(topText.isEmpty() && bottomText.isEmpty() && leftText.isEmpty() && rightText.isEmpty()) && fileName.isNotEmpty()
 
                 OutlinedTextField(
                     value = bottomText,
@@ -150,27 +187,23 @@ fun PdfScreen(pdfUri: Uri?) {
                     suffix = { Text("px") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                        }
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
                 Button(
-                    onClick = {
-                        addMarginsToPdf(
-                            context = context,
-                            inputUri = pdfUri,
-                            topMargin = topText.toFloatOrNull() ?: 0f,
-                            bottomMargin = bottomText.toFloatOrNull() ?: 0f,
-                            leftMargin = leftText.toFloatOrNull() ?: 0f,
-                            rightMargin = rightText.toFloatOrNull() ?: 0f
-                        )
-                    },
+                    onClick = execute,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp, bottom = 16.dp),
-                    enabled = topText.isNotEmpty() || bottomText.isNotEmpty() || leftText.isNotEmpty() || rightText.isNotEmpty()
+                    enabled = isExecutable
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -192,6 +225,7 @@ fun PdfScreen(pdfUri: Uri?) {
 
 private fun addMarginsToPdf(
     context: Context,
+    exportFileName: String,
     inputUri: Uri?,
     topMargin: Float,
     bottomMargin: Float,
@@ -206,7 +240,7 @@ private fun addMarginsToPdf(
 
     try {
         val inputStream = context.contentResolver.openInputStream(inputUri)
-        val outputFile = File(context.cacheDir, "output_${System.currentTimeMillis()}.pdf")
+        val outputFile = File(context.cacheDir, "${exportFileName}.pdf")
         // PDF 로드
         val oldDoc = PDDocument.load(inputStream)
         val newDoc = PDDocument()
@@ -266,7 +300,8 @@ private fun addMarginsToPdf(
 @Composable
 fun PdfScreenPreview() {
     NoteRoomTheme(
-        darkTheme = true
+        darkTheme = true,
+        dynamicColor = false
     ) {
         PdfScreen(Uri.parse(GITHUB_URI))
     }
