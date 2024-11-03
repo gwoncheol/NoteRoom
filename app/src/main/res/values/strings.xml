@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">noteroom</string>
+    <string name="file">file</string>
 </resources>
