@@ -51,7 +51,8 @@ private fun isNumber(text: String): Boolean {
 }
 
 @Composable
-fun PdfScreen(pdfUri: Uri?) {
+fun PdfScreen(pdfUriString: String?) {
+    val pdfUri = Uri.parse(pdfUriString)
     val defaultFileNameWithExtension = if (pdfUri?.lastPathSegment == null) "알 수 없는 파일" else pdfUri
         .lastPathSegment + ".pdf"
     val defaultFileName = pdfUri?.lastPathSegment ?: "알 수 없는 파일"
@@ -303,6 +304,8 @@ fun PdfScreenPreview() {
         darkTheme = true,
         dynamicColor = false
     ) {
-        PdfScreen(Uri.parse(GITHUB_URI))
+        PdfScreen(
+            pdfUriString = GITHUB_URI
+        )
     }
 }

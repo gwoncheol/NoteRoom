@@ -7,9 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.brownstarlab.noteroom.ui.theme.NoteRoomTheme
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 
@@ -55,10 +57,23 @@ fun AppNavigation(
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Screens.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                navigateToPdf = { uri ->
+                    navController.navigate(Screens.Pdf.createRoute(uri.toString()))
+                }
+            )
         }
-        composable(Screens.Pdf.route) {
-            PdfScreen(pdfUri)
+        composable(
+            route = Screens.Pdf.route,
+            arguments = listOf(
+                navArgument("uri") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) { backStackEntry ->
+            val uri = backStackEntry.arguments?.getString("uri", pdfUri.toString())
+            PdfScreen(uri)
         }
     }
 }
