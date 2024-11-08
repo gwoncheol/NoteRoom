@@ -1,3 +1,4 @@
 package com.brownstarlab.noteroom
 
-val GITHUB_URI = "https://github.com/gwoncheol/NoteRoom"
+const val PDF_STEP_COUNT = 2
+const val GITHUB_URI = "https://github.com/gwoncheol/NoteRoom"

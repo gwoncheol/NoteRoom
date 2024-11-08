@@ -1,7 +1,19 @@
 package com.brownstarlab.noteroom
 
-sealed class Screens(val route: String) {
-    data object Home : Screens("home")
-    data object Pdf : Screens("pdf")
-    data object Preview : Screens("preview")
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed class Screens {
+    @Serializable
+    data object Home : Screens()
+
+    @Serializable
+    data object Pdf : Screens() {
+        @Serializable
+        data object Select : Screens()
+
+        @Serializable
+        data object Edit : Screens()
+    }
 }
+
