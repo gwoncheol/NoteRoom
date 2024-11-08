@@ -1,12 +1,19 @@
 package com.brownstarlab.noteroom
 
-sealed class Screens(val route: String) {
-    data object Home : Screens("home")
-    data object Pdf : Screens("pdf") {
-        data object Select : Screens("pdf/select")
-        data object Edit : Screens("pdf/edit")
+import kotlinx.serialization.Serializable
 
-        fun createRoute(uriString: String) = "pdf/$uriString"
+@Serializable
+sealed class Screens {
+    @Serializable
+    data object Home : Screens()
+
+    @Serializable
+    data object Pdf : Screens() {
+        @Serializable
+        data object Select : Screens()
+
+        @Serializable
+        data object Edit : Screens()
     }
 }
 

@@ -9,8 +9,9 @@ lifecycle-runtime-ktx = "2.8.6"
 core-ktx = "1.13.1"
 navigation-compose = "2.8.3"
 pdfbox-android = "2.0.27.0"
-compose-bom = "2023.08.00"
-serialization = "1.7.3"
+compose-bom = "2024.10.01"
+serialization = "1.6.3"
+coil-compose = "2.7.0"
 
 
 [libraries]
@@ -31,6 +32,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil-compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

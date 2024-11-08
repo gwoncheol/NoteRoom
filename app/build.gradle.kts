@@ -70,4 +70,5 @@ dependencies {
 
     implementation(libs.pdfbox.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.coil.compose)
 }

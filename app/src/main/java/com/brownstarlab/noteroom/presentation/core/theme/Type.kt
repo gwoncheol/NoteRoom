@@ -1,4 +1,4 @@
-package com.brownstarlab.noteroom.ui.theme
+package com.brownstarlab.noteroom.presentation.core.theme
 
 import androidx.compose.material3.Typography
 

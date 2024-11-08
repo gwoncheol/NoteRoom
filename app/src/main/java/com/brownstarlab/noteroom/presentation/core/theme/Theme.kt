@@ -1,4 +1,4 @@
-package com.brownstarlab.noteroom.ui.theme
+package com.brownstarlab.noteroom.presentation.core.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
