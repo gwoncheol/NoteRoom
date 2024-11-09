@@ -11,10 +11,7 @@ import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.wait
-import java.io.File
 
 class PdfBitmapConverter {
     var pdfRenderer: PdfRenderer? = null

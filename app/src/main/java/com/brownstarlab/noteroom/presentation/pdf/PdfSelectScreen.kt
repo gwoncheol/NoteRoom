@@ -3,6 +3,7 @@ package com.brownstarlab.noteroom.presentation.pdf
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,13 +37,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.brownstarlab.noteroom.PDF_STEP_COUNT
 import com.brownstarlab.noteroom.presentation.core.components.AppBarNavButton
 import com.brownstarlab.noteroom.presentation.core.components.AppBarTitle
@@ -152,8 +153,8 @@ fun PdfSelectScreen(
                         .padding(top = 20.dp, bottom = 20.dp)
                 ) {
                     items(state.bitmaps) { page ->
-                        AsyncImage(
-                            model = page,
+                        Image(
+                            bitmap = page.asImageBitmap(),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillParentMaxSize()
