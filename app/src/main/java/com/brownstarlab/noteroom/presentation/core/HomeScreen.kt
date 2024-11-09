@@ -139,7 +139,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     modifier = Modifier.size(20.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.github_icon),
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_github),
                     contentDescription = "Goto Github"
                 )
                 Text(
