@@ -255,7 +255,7 @@ private suspend fun addMarginToPdf2(
                         page.canvas.drawBitmap(
                             bitmap,
                             marginStart.toFloat(),
-                            marginEnd.toFloat(),
+                            marginTop.toFloat(),
                             null
                         )
                         it.finishPage(page)
