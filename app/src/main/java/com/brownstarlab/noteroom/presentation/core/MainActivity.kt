@@ -21,13 +21,11 @@ import com.brownstarlab.noteroom.presentation.pdf.PdfEvent
 import com.brownstarlab.noteroom.presentation.pdf.PdfSelectScreen
 import com.brownstarlab.noteroom.presentation.pdf.PdfViewModel
 import com.brownstarlab.noteroom.sharedViewModel
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        PDFBoxResourceLoader.init(applicationContext)
         enableEdgeToEdge()
         val pdfUri: Uri? = when (intent?.action) {
             Intent.ACTION_SEND -> {

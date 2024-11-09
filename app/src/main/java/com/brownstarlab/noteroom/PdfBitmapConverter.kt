@@ -4,17 +4,22 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.pdf.PdfDocument
+import android.graphics.pdf.PdfDocument.PageInfo
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
+import java.io.File
 
 class PdfBitmapConverter {
     var pdfRenderer: PdfRenderer? = null
 
-    suspend fun convertFromUri(context: Context, contentUri: Uri): List<Bitmap> =
+    suspend fun convertPdf2Bitmaps(context: Context, contentUri: Uri): List<Bitmap> =
         withContext(Dispatchers.IO) {
             pdfRenderer?.close()
 
@@ -49,4 +54,40 @@ class PdfBitmapConverter {
                 }
             } ?: emptyList()
         }
+
+    suspend fun convertBitmaps2Pdf(
+        context: Context,
+        bitmaps: List<Bitmap>,
+        destination: Uri,
+        marginTop: Int,
+        marginBottom: Int,
+        marginStart: Int,
+        marginEnd: Int
+    ) {
+        withContext(Dispatchers.IO) {
+            PdfDocument().let {
+                bitmaps.map { bitmap ->
+                    async {
+                        val pageInfo = PageInfo.Builder(
+                            marginStart + bitmap.width + marginEnd,
+                            marginTop + bitmap.height + marginBottom,
+                            1
+                        ).create()
+                        val page = it.startPage(pageInfo)
+                        page.canvas.drawBitmap(
+                            bitmap,
+                            marginStart.toFloat(),
+                            marginEnd.toFloat(),
+                            null
+                        )
+                        it.finishPage(page)
+                    }
+                }.awaitAll()
+
+                it.writeTo(context.contentResolver.openOutputStream(destination))
+                it.close()
+            }
+        }
+    }
+
 }

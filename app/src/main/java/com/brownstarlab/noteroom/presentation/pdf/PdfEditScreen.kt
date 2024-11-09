@@ -3,6 +3,8 @@ package com.brownstarlab.noteroom.presentation.pdf
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -28,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,11 +49,11 @@ import com.brownstarlab.noteroom.presentation.core.components.AppBarNavButton
 import com.brownstarlab.noteroom.presentation.core.components.AppBarTitle
 import com.brownstarlab.noteroom.presentation.core.theme.NoteRoomTheme
 import com.brownstarlab.noteroom.showAsToast
-import com.tom_roush.harmony.awt.geom.AffineTransform
-import com.tom_roush.pdfbox.multipdf.LayerUtility
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.pdmodel.PDPage
-import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,17 +65,20 @@ fun PdfEditScreen(
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
     val canProcess = state.name != null
     val doProcess = {
-        addMarginsToPdf(
-            context,
-            state.name ?: "",
-            state.uri,
-            state.marginTop?.toFloat() ?: 0f,
-            state.marginBottom?.toFloat() ?: 0f,
-            state.marginLeft?.toFloat() ?: 0f,
-            state.marginRight?.toFloat() ?: 0f
-        )
+        scope.launch {
+            addMarginToPdf2(
+                context,
+                state.name ?: "",
+                state.bitmaps,
+                state.marginTop ?: 0,
+                state.marginBottom ?: 0,
+                state.marginStart ?: 0,
+                state.marginEnd ?: 0
+            )
+        }
     }
 
     Scaffold(
@@ -147,8 +153,8 @@ fun PdfEditScreen(
                 shape = RoundedCornerShape(16.dp),
             )
             OutlinedTextField(
-                value = state.marginLeft?.toString() ?: "",
-                onValueChange = { emit(PdfEvent.SetMarginLeft((it.toIntOrNull() ?: 0))) },
+                value = state.marginStart?.toString() ?: "",
+                onValueChange = { emit(PdfEvent.SetMarginStart((it.toIntOrNull() ?: 0))) },
                 placeholder = { Text("여백 크기") },
                 label = { Text("왼쪽 여백") },
                 suffix = { Text("mm") },
@@ -164,8 +170,8 @@ fun PdfEditScreen(
                 shape = RoundedCornerShape(16.dp),
             )
             OutlinedTextField(
-                value = state.marginRight?.toString() ?: "",
-                onValueChange = { emit(PdfEvent.SetMarginRight((it.toIntOrNull() ?: 0))) },
+                value = state.marginEnd?.toString() ?: "",
+                onValueChange = { emit(PdfEvent.SetMarginEnd((it.toIntOrNull() ?: 0))) },
                 placeholder = { Text("여백 크기") },
                 label = { Text("오른쪽 여백") },
                 suffix = { Text("mm") },
@@ -226,76 +232,64 @@ fun PdfEditScreen(
 
 }
 
-private fun addMarginsToPdf(
+private suspend fun addMarginToPdf2(
     context: Context,
     exportFileName: String,
-    inputUri: Uri?,
-    topMargin: Float,
-    bottomMargin: Float,
-    leftMargin: Float,
-    rightMargin: Float,
+    originalBitmaps: List<Bitmap>,
+    marginTop: Int,
+    marginBottom: Int,
+    marginStart: Int,
+    marginEnd: Int
 ) {
-    if (inputUri == null) {
-        Log.e("PdfScreen", "PDF 파일이 없습니다.")
-        "PDF 파일이 없습니다.".showAsToast(context)
-        return
-    }
+    withContext(Dispatchers.IO) {
+        try {
+            val outputFile = PdfDocument().let {
+                originalBitmaps.map { bitmap ->
+                    async {
+                        val pageInfo = PdfDocument.PageInfo.Builder(
+                            marginStart + bitmap.width + marginEnd,
+                            marginTop + bitmap.height + marginBottom,
+                            1
+                        ).create()
+                        val page = it.startPage(pageInfo)
+                        page.canvas.drawBitmap(
+                            bitmap,
+                            marginStart.toFloat(),
+                            marginEnd.toFloat(),
+                            null
+                        )
+                        it.finishPage(page)
+                    }
+                }.awaitAll()
+                val outputFile = File(context.cacheDir, "${exportFileName}.pdf")
+                it.writeTo(outputFile.outputStream())
+                it.close()
+                outputFile
+            }
+            // 파일 공유
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                outputFile
+            )
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
 
-    try {
-        val inputStream = context.contentResolver.openInputStream(inputUri)
-        val outputFile = File(context.cacheDir, "${exportFileName}.pdf")
-        // PDF 로드
-        val oldDoc = PDDocument.load(inputStream)
-        val newDoc = PDDocument()
-
-        oldDoc.use {
-            for (page in it.pages) {
-                // 새로운 크기 계산
-                val newBox = PDRectangle(
-                    page.cropBox.width + leftMargin + rightMargin,
-                    page.cropBox.height + topMargin + bottomMargin
-                )
-                // 새 페이지 생성
-                val newPage = PDPage(newBox)
-                newDoc.addPage(newPage)
-                val layerUtility = LayerUtility(newDoc)
-                val formXObject = layerUtility.importPageAsForm(it, page)
-                val afTransform = AffineTransform.getTranslateInstance(
-                    leftMargin.toDouble(),
-                    topMargin.toDouble()
-                )
-                layerUtility.appendFormAsLayer(
-                    newPage,
-                    formXObject,
-                    afTransform,
-                    "page_${page.hashCode()}"
-                )
+            withContext(Dispatchers.Main) {
+                "PDF 여백 추가 완료!".showAsToast(context)
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "공유하기"))
+            (context as Activity).finish()
+        } catch (e: Exception) {
+            Log.e("PdfScreen", "PDF 처리 중 에러 발생", e)
+            withContext(Dispatchers.Main) {
+                "PDF 처리 중 오류 발생".showAsToast(context)
             }
         }
-        // 저장
-        newDoc.save(outputFile)
-        newDoc.close()
-        // 파일 공유
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.provider",
-            outputFile
-        )
-//        val uri = outputFile.toUri()
-        val shareIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            type = "application/pdf"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-
-        "PDF 여백 추가 완료!".showAsToast(context)
-        context.startActivity(Intent.createChooser(shareIntent, "공유하기"))
-        (context as Activity).finish()
-
-    } catch (e: Exception) {
-        Log.e("PdfScreen", "PDF 처리 중 에러 발생", e)
-        "PDF 처리 중 오류 발생".showAsToast(context)
     }
 }
 

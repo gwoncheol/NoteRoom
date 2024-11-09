@@ -20,8 +20,8 @@ class PdfViewModel : ViewModel() {
             is PdfEvent.SetUri -> setUri(event.context, event.uri)
             is PdfEvent.SetMarginTop -> setMarginTop(event.margin)
             is PdfEvent.SetMarginBottom -> setMarginBottom(event.margin)
-            is PdfEvent.SetMarginLeft -> setMarginLeft(event.margin)
-            is PdfEvent.SetMarginRight -> setMarginRight(event.margin)
+            is PdfEvent.SetMarginStart -> setMarginLeft(event.margin)
+            is PdfEvent.SetMarginEnd -> setMarginRight(event.margin)
             is PdfEvent.SetName -> setName(event.name)
             is PdfEvent.ClearUri -> clearUri()
             is PdfEvent.ClearName -> clearName()
@@ -36,7 +36,7 @@ class PdfViewModel : ViewModel() {
             _state.value = state.value.copy(
                 isConverting = true
             )
-            val bitmaps = pdfBitmapConverter.convertFromUri(context, uri)
+            val bitmaps = pdfBitmapConverter.convertPdf2Bitmaps(context, uri)
             _state.value = state.value.copy(
                 uri = uri,
                 oldName = newOldName,
@@ -63,13 +63,13 @@ class PdfViewModel : ViewModel() {
     }
 
     private fun setMarginLeft(margin: Int) {
-        if (margin == state.value.marginLeft) return
-        _state.value = state.value.copy(marginLeft = margin)
+        if (margin == state.value.marginStart) return
+        _state.value = state.value.copy(marginStart = margin)
     }
 
     private fun setMarginRight(margin: Int) {
-        if (margin == state.value.marginRight) return
-        _state.value = state.value.copy(marginRight = margin)
+        if (margin == state.value.marginEnd) return
+        _state.value = state.value.copy(marginEnd = margin)
     }
 
     private fun setName(name: String) {
