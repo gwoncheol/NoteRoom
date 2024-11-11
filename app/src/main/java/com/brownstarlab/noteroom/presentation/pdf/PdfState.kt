@@ -13,5 +13,8 @@ data class PdfState(
     val marginBottom: Int? = null,
     val marginStart: Int? = null,
     val marginEnd: Int? = null,
-    val name: String? = null
+    val name: String? = null,
+    //
+    val resultUri: Uri? = null,
+    val isError: Boolean = false
 )

@@ -14,6 +14,9 @@ sealed class Screens {
 
         @Serializable
         data object Edit : Screens()
+
+        @Serializable
+        data object Result : Screens()
     }
 }
 

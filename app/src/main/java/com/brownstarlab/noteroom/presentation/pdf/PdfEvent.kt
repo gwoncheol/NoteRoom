@@ -12,4 +12,5 @@ sealed class PdfEvent {
     data class SetName(val name: String) : PdfEvent()
     data object ClearUri : PdfEvent()
     data object ClearName : PdfEvent()
+    data class Convert(val context: Context) : PdfEvent()
 }
