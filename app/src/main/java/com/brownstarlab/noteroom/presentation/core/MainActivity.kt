@@ -6,6 +6,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -15,6 +17,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.brownstarlab.noteroom.Screens
+import com.brownstarlab.noteroom.enterTransition
+import com.brownstarlab.noteroom.popExitTransition
 import com.brownstarlab.noteroom.presentation.core.theme.NoteRoomTheme
 import com.brownstarlab.noteroom.presentation.pdf.PdfEditScreen
 import com.brownstarlab.noteroom.presentation.pdf.PdfEvent
@@ -58,17 +62,25 @@ fun AppNavigation(
         navController = navController,
         startDestination = if (pdfUri == null) Screens.Home else Screens.Pdf
     ) {
-        composable<Screens.Home> {
+        composable<Screens.Home>(
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            enterTransition = { enterTransition() },
+            popExitTransition = { popExitTransition() }
+        ) {
             HomeScreen(
-                gotoPdfStep = {
-                    navController.navigate(Screens.Pdf)
-                }
+                gotoPdfStep = { navController.navigate(Screens.Pdf) }
             )
         }
         navigation<Screens.Pdf>(
             startDestination = Screens.Pdf.Select
         ) {
-            composable<Screens.Pdf.Select> {
+            composable<Screens.Pdf.Select>(
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                enterTransition = { enterTransition() },
+                popExitTransition = { popExitTransition() }
+            ) {
                 val viewModel = it.sharedViewModel<PdfViewModel>(navController)
                 val state = viewModel.state.collectAsStateWithLifecycle()
                 val context = LocalContext.current
@@ -87,7 +99,12 @@ fun AppNavigation(
                     goNext = goNext,
                 )
             }
-            composable<Screens.Pdf.Edit> {
+            composable<Screens.Pdf.Edit>(
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                enterTransition = { enterTransition() },
+                popExitTransition = { popExitTransition() }
+            ) {
                 val viewModel = it.sharedViewModel<PdfViewModel>(navController)
                 val state = viewModel.state.collectAsStateWithLifecycle()
 
