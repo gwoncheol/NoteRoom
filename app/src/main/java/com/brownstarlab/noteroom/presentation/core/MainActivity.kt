@@ -22,6 +22,7 @@ import com.brownstarlab.noteroom.popExitTransition
 import com.brownstarlab.noteroom.presentation.core.theme.NoteRoomTheme
 import com.brownstarlab.noteroom.presentation.pdf.PdfEditScreen
 import com.brownstarlab.noteroom.presentation.pdf.PdfEvent
+import com.brownstarlab.noteroom.presentation.pdf.PdfResultScreen
 import com.brownstarlab.noteroom.presentation.pdf.PdfSelectScreen
 import com.brownstarlab.noteroom.presentation.pdf.PdfViewModel
 import com.brownstarlab.noteroom.sharedViewModel
@@ -84,7 +85,6 @@ fun AppNavigation(
                 val viewModel = it.sharedViewModel<PdfViewModel>(navController)
                 val state = viewModel.state.collectAsStateWithLifecycle()
                 val context = LocalContext.current
-                val goNext = { navController.navigate(Screens.Pdf.Edit) }
 
                 pdfUri?.let { uri ->
                     LaunchedEffect(key1 = uri) {
@@ -96,7 +96,7 @@ fun AppNavigation(
                     state = state.value,
                     emit = { event -> viewModel.emit(event) },
                     goBack = { navController.popBackStack() },
-                    goNext = goNext,
+                    goNext = { navController.navigate(Screens.Pdf.Edit) },
                 )
             }
             composable<Screens.Pdf.Edit>(
@@ -111,7 +111,25 @@ fun AppNavigation(
                 PdfEditScreen(
                     state = state.value,
                     emit = { event -> viewModel.emit(event) },
+                    goNext = { navController.navigate(Screens.Pdf.Result) },
                     goBack = { navController.popBackStack() }
+                )
+            }
+            composable<Screens.Pdf.Result>(
+                exitTransition = { popExitTransition() },
+                popEnterTransition = { EnterTransition.None },
+                enterTransition = { enterTransition() },
+                popExitTransition = { popExitTransition() }
+            ) {
+                val viewModel = it.sharedViewModel<PdfViewModel>(navController)
+                val state = viewModel.state.collectAsStateWithLifecycle()
+
+                PdfResultScreen(
+                    state = state.value,
+                    emit = { event -> viewModel.emit(event) },
+                    goBack = {
+                        navController.popBackStack<Screens.Pdf.Select>(true)
+                    }
                 )
             }
         }
