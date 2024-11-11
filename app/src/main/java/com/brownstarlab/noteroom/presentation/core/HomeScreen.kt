@@ -141,7 +141,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 onClick = gotoPdfStep,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(
                     modifier = Modifier.size(20.dp),
