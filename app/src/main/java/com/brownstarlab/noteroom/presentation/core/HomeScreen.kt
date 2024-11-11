@@ -1,8 +1,5 @@
 package com.brownstarlab.noteroom.presentation.core
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,25 +42,13 @@ import com.brownstarlab.noteroom.GITHUB_URI
 import com.brownstarlab.noteroom.R
 import com.brownstarlab.noteroom.presentation.core.components.AppBarTitle
 import com.brownstarlab.noteroom.presentation.core.theme.NoteRoomTheme
-import com.brownstarlab.noteroom.showAsToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     gotoPdfStep: () -> Unit = {}
 ) {
-    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    // PDF 선택을 위한 launcher 설정
-    val pdfPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri == null) {
-            "pdf 열기를 실패하였습니다.".showAsToast(context)
-        } else {
-            gotoPdfStep()
-        }
-    }
 
     Scaffold(
         topBar = {

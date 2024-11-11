@@ -4,6 +4,15 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.widget.Toast
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseInSine
+import androidx.compose.animation.core.EaseOutSine
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -56,4 +65,24 @@ fun Uri.getFileName(context: Context): String {
         val list = it.getString(nameIndex).split(".")
         list.subList(0, list.size - 1).fastJoinToString(".")
     } ?: File(path!!).name
+}
+
+fun enterTransition(): EnterTransition {
+    return slideInHorizontally(
+        animationSpec = tween(300, 0, EaseInSine),
+        initialOffsetX = { it / 10 },
+    ) + fadeIn(
+        animationSpec = tween(300, 0, EaseInSine),
+        initialAlpha = 0.0f
+    )
+}
+
+fun popExitTransition(): ExitTransition {
+    return slideOutHorizontally(
+        targetOffsetX = { it / 10 },
+        animationSpec = tween(300, 0, EaseOutSine)
+    ) + fadeOut(
+        animationSpec = tween(300, 0, EaseOutSine),
+        targetAlpha = 0.0f
+    )
 }
